@@ -1,15 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Amplify } from 'aws-amplify';
 import { generateClient } from 'aws-amplify/data';
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
-import outputs from '@/amplify_outputs.json';
 import type { Schema } from '@/amplify/data/resource';
 
-Amplify.configure(outputs);
-const client = generateClient<Schema>();
+// Dynamic import for amplify_outputs
+let client: any;
+if (typeof window !== 'undefined') {
+  import('@/amplify_outputs.json').then((outputs) => {
+    Amplify.configure(outputs.default);
+    client = generateClient<Schema>();
+  }).catch(() => {
+    console.log('Amplify outputs not found - running in development mode');
+  });
+}
 
 export default function LeadScoutPro() {
   const { user, signOut } = useAuthenticator();
